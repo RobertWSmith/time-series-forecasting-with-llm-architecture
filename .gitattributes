@@ -1,0 +1,9 @@
+# Normalize line endings across platforms
+* text=auto
+
+# Use built-in TeX diff configuration for better diff headers
+*.tex diff=tex
+
+# Exclude common generated auxiliary files from git archive
+*.aux export-ignore
+*.log export-ignore
