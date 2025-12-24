@@ -1,0 +1,80 @@
+\subsection{Transformer Architecture}
+
+    The transformer can be understood as a nonlinear, data-adaptive operator on sequences that replaces explicit
+    state-space recursion with repeated applications of weighted averaging and pointwise nonlinear transformations.
+    For statisticians, it is useful to view the architecture as a structured sequence of regression-like operations
+    with learned, input-dependent weights. \cite{vaswani2023attentionneed}
+
+    At its core, a transformer maps an input sequence $$x_1,\dots,x_n \in \mathbb{R}^p$$ into a sequence of latent
+    representations $$h_1^{(L)},\dots,h_n^{(L)} \in \mathbb{R}^d$$ through (L) stacked layers.
+    Each layer consists of two components: self-attention and a position-wise feed-forward map, combined with residual
+    connections and normalization.
+
+\subsection*{Self-Attention as Adaptive Linear Smoothing}
+    Self-attention replaces fixed-lag dependence with data-dependent linear combinations across all time indices.
+    Given latent inputs ($$H = (h_1,\dots,h_n)$$), three linear projections are formed:
+    $$Q = HW_Q,\quad K = HW_K,\quad V = HW_V$$, where (W_Q,W_K,W_V) are learned matrices.
+    For each time index (i), the output is $$\tilde h_i = \sum_{j=1}^n \alpha_{ij} v_j$$, with weights
+    $$\alpha_{ij} = \frac{\exp\left( q_i^\top k_j / \sqrt{d_k} \right)}{\sum_{\ell=1}^n \exp\left( q_i^\top k_\ell / \sqrt{d_k} \right)}$$.
+
+    From a statistical perspective, this is a soft, normalized kernel smoother, where:
+
+    \begin{itemize}
+        \item the kernel is learned rather than fixed,
+        \item similarity is measured in a learned feature space,
+        \item weights depend on the entire observed sequence.
+    \end{itemize}
+
+    Unlike classical smoothing or autoregression, the effective dependency structure is global and adaptive, not tied to
+    time ordering unless explicitly enforced.
+
+\subsection*{Multi-Head Attention as Parallel Projections}
+    Instead of a single smoother, the transformer uses multi-head attention, running several attention mechanisms in
+    parallel on different linear projections of the data.
+    These heads can be interpreted as learning multiple, complementary notions of dependence (e.g., short-range vs.
+    long-range, trend vs. seasonality).
+    The outputs are concatenated and linearly recombined, analogous to forming a multivariate basis expansion before
+    aggregation.
+
+\subsection*{Feed-forward layers as local nonlinear regression}
+    After attention, each position is passed through a position-wise feed-forward network:
+    $$h_i \mapsto W_2 \sigma(W_1 h_i + b_1) + b_2$$, applied independently across time.
+    This can be viewed as a nonlinear regression applied conditionally on the aggregated context produced by attention.
+    Importantly, there is no interaction across time indices at this stage; all cross-time dependence is handled by
+    attention.
+
+\subsection*{Residual Connections and Normalization}
+    Each sublayer is wrapped in a residual connection and layer normalization:
+    $$h \leftarrow \text{LayerNorm}(h + \text{Sublayer}(h))$$.
+    Statistically, this stabilizes estimation by preserving a linear identity path while allowing incremental nonlinear
+    corrections, mitigating vanishing gradients and overfitting in deep stacks.
+
+\subsection*{Positional information}
+    Because attention alone is permutation-invariant, the transformer injects positional encodings—deterministic or
+    learned functions of time index—added to the inputs.
+    These act as fixed regressors indicating temporal location, allowing the model to distinguish ordering while
+    retaining global interactions .
+
+\subsection*{Encoder–decoder structure (when used for forecasting or translation)}
+    In sequence-to-sequence settings, an encoder constructs latent summaries of the input sequence, while a decoder
+    generates outputs autoregressively.
+    The decoder includes masked self-attention, enforcing causal structure, and cross-attention, which performs
+    regression of future values on learned summaries of the past.
+
+\subsection*{Statistical interpretation}
+    From a statistical standpoint, a transformer is:
+
+    \begin{itemize}
+        \item a stacked sequence of adaptive linear smoothers (attention),
+        \item interleaved with pointwise nonlinear regressions,
+        \item where dependence structure, effective dimension, and interaction range are learned from data rather than
+        specified a priori.
+    \end{itemize}
+
+    Unlike ARIMA or state-space models, dependence is not parameterized explicitly; instead, it emerges through learned
+    similarity kernels.
+    Unlike Gaussian processes, kernels are input-dependent and evolve across layers.
+    This framing clarifies both the expressive power of transformers and why, as noted in recent time-series analyses,
+    they often operate in low-rank regimes, making them highly flexible yet compressible when applied to structured
+    temporal data.
+

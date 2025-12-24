@@ -1,0 +1,47 @@
+\subsection{Understanding Transformers for Time Series}
+
+    The paper analyzes transformer models for time series through the lens of numerical rank and low-rank structure, arguing
+    that many architectural choices inherited from language models are theoretically and practically mismatched to
+    time-series data. \cite{yu2025understandingtransformerstimeseries}
+
+    The central empirical observation is that time-series embeddings are intrinsically low rank compared to embeddings
+    arising from text or vision.
+    Because time series are continuous, smooth, and typically patched from low-dimensional inputs, their embedded
+    representations exhibit rapidly decaying singular value spectra.
+    The authors formalize this using the notion of ε-rank and show, both empirically and theoretically, that common
+    time-series embedding strategies—quantization-based tokenization and continuous MLP-based embeddings—map inputs into
+    low-dimensional subspaces of the model’s hidden space.
+    For continuous embeddings, they provide approximation-theoretic guarantees: smooth or analytic embedding functions
+    induce polynomial or exponential decay of singular values, implying strong compressibility independent of the ambient
+    model dimension.
+
+    Building on this, the paper establishes theoretical links between low-rank inputs and low-rank attention.
+    The authors prove that when the input embeddings lie in a low-rank subspace, the query, key, and value projections in
+    self-attention can be uniformly approximated by low-rank matrices without loss of accuracy on those inputs.
+    Conversely, they show that high-rank inputs (as in language or vision models) make attention layers fundamentally
+    incompressible.
+    This result provides a linear-algebraic explanation for why large attention matrices are often unnecessary in
+    time-series transformers.
+
+    A key conceptual contribution is the notion of “flow-of-ranks.” While early layers operate on strongly low-rank
+    representations, nonlinearities, residual connections, and multi-head attention gradually increase numerical rank with
+    depth.
+    The authors characterize this rank inflation theoretically and empirically, showing that earlier layers are
+    substantially more compressible than later ones and that the number of attention heads directly influences how quickly
+    rank grows.
+    This explains observed depth-dependent differences in compressibility and clarifies why uniform architectural scaling
+    across layers is inefficient for time-series models.
+
+    These insights are applied to model compression and architectural design.
+    Using truncated SVD, the authors compress attention matrices in a pretrained Chronos time-series foundation model,
+    achieving large reductions in memory and inference time with negligible forecasting degradation.
+    They further show that better results are obtained by pretraining compressed models, using layer-dependent low-rank
+    parameterizations informed by the flow-of-ranks analysis, thereby improving the accuracy–efficiency Pareto frontier.
+
+    Overall, the paper provides a statistically grounded, linear-algebraic framework for understanding transformers on time
+    series.
+    It demonstrates that low-rank structure is not incidental but intrinsic to the data modality, yielding principled
+    guidance for attention width, depth, and head count, and offering a theoretical justification for why time-series
+    foundation models are far more compressible than their language counterparts.
+
+

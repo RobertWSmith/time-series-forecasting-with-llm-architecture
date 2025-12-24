@@ -1,12 +1,13 @@
-%! Author = Robert W. Smith
-%! Date = 12/20/2025
+\documentclass[a4paper, 12pt]{article}
+\usepackage{amsfonts}
 
-% Preamble
-\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{babel,csquotes,xpatch}
+\usepackage[backend=biber, style=numeric]{biblatex}
+\addbibresource{main.bib}
 
-% Packages
-\usepackage{amsmath}
-\usepackage{biblatex}
+\usepackage{xurl}
+\usepackage[colorlinks,allcolors=blue]{hyperref}
 
 % Document
 \begin{document}
@@ -14,12 +15,18 @@
     \frenchspacing
     \raggedbottom
     \selectlanguage{american}
-    \pagenumbering{roman}
+    \pagenumbering{arabic}
     \pagestyle{plain}
 
+    \tableofcontents
+    \newpage
 
+    \section{Literature Review}\label{sec:literature-review}
+        \include{summaries/transformers}
+        \include{summaries/chronos}
+        \include{summaries/time-series-transformers}
 
-    \bibliography{main}
-    \bibliographystyle{plain}
+    \section{Bibliography}\label{sec:bibliography}
+        \bibliographystyle{plain}
 
 \end{document}

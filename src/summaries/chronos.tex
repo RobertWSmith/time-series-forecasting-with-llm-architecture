@@ -1,15 +1,77 @@
-%! Author = rober
-%! Date = 12/23/2025
+\subsection{Chronos}
 
-% Preamble
-\documentclass[11pt]{article}
+    Ansari et al. propose Chronos, a pretrained probabilistic time series forecasting framework that reformulates
+    forecasting as a language modeling problem by discretizing real-valued time series into tokens and training standard
+    transformer-based language models using a categorical cross-entropy objective.
+    \cite{ansari2024chronoslearninglanguagetime} The central insight is that, once numerical observations are
+    appropriately scaled and quantized, forecasting can be treated analogously to next-token prediction, allowing
+    off-the-shelf language model architectures to be used without time-series-specific architectural modifications.
 
-% Packages
-\usepackage{amsmath}
+    Chronos operates by applying mean scaling to each time series and uniform quantization into a fixed vocabulary of
+    bins, augmented with standard special tokens (e.g., PAD, EOS).
+    Forecasting is performed autoregressively over these tokens, and probabilistic forecasts are obtained by sampling
+    multiple future token trajectories and dequantizing them back into real values.
+    This approach effectively performs regression via classification, enabling flexible,potentially multimodal
+    predictive distributions while retaining the simplicity of categorical modeling.
 
-% Document
-\begin{document}
+    The authors pretrain Chronos models based on the T5 architecture, ranging from 20M to 710M parameters, on a large
+    corpus of publicly available time series datasets.
+    To mitigate data scarcity and improve generalization, they introduce two augmentation strategies: TSMixup, which
+    generates synthetic series via convex combinations of real series from different datasets, and KernelSynth, which
+    produces synthetic time series using Gaussian processes with randomly composed kernels.
+    These augmentations substantially expand the diversity of temporal patterns seen during pretraining.
 
+    Extensive experiments across 42 benchmark datasets demonstrate that Chronos significantly outperforms classical
+    statistical models and task-specific deep learning approaches on datasets seen during training, while achieving
+    competitive or superior zero-shot performance on unseen datasets—often without any task-specific fine-tuning.
+    Compared to approaches that adapt large pretrained LLMs through prompting or fine-tuning, Chronos attains strong
+    performance with modest model sizes and lower inference cost.
 
+    Overall, the paper shows that minimal adaptations of language modeling techniques—specifically tokenization through
+    scaling and quantization—are sufficient to produce a strong general-purpose, zero-shot time series forecaster.
+    Chronos provides evidence that pretrained language-model-style approaches can substantially simplify forecasting
+    pipelines and serves as a compelling baseline for future research on foundation models for time series forecasting.
 
-\end{document}
+\subsection{Chronos-2}
+
+    Ansari et al. introduce Chronos-2, a pretrained time series forecasting model that generalizes zero-shot forecasting
+    from purely univariate settings to univariate, multivariate, and covariate-informed tasks within a single unified
+    framework. \cite{ansari2025chronos2univariateuniversalforecasting}
+    The work addresses a key limitation of earlier time-series foundation models, including the original Chronos, which
+    largely ignore inter-series dependencies and exogenous variables despite their central role in real-world
+    forecasting problems.
+
+    Chronos-2 is built around a group attention mechanism that enables in-context learning across flexible groupings of
+    time series. Groups may represent independent series, multiple variates of a multivariate system, collections of
+    related items for cross-learning, or combinations of targets with past-only and known covariates.
+    By alternating time attention (along the temporal axis) with group attention (across series within a group), the
+    model learns to infer interdependencies dynamically at inference time, without requiring task-specific architectural
+    changes or fine-tuning.
+
+    The model adopts an encoder-only transformer architecture inspired by T5 and operates on patched, normalized
+    real-valued inputs rather than discrete tokens.
+    Inputs are robustly standardized using a sinh⁻¹ transformation to stabilize heavy-tailed distributions, augmented
+    with explicit time-index and mask meta-features, and embedded via a residual patch encoder.
+    Forecasts are produced through a direct multi-horizon quantile head, yielding probabilistic predictions over a dense
+    grid of quantiles, including extreme tails to better capture rare events.
+
+    A central contribution of the paper lies in its training strategy.
+    Because real multivariate and covariate-rich datasets are scarce at scale, Chronos-2 relies heavily on synthetic
+    data generation.
+    The authors introduce multivariatization procedures that impose contemporaneous and sequential dependencies on base
+    univariate series, enabling the model to learn diverse multivariate structures and covariate relationships during
+    pretraining.
+    Empirical ablations show that these synthetic datasets are critical for enabling universal in-context learning and
+    that models trained exclusively on synthetic data remain competitive.
+
+    Extensive evaluation on three large benchmarks—fev-bench, GIFT-Eval, and Chronos Benchmark II—demonstrates that
+    Chronos-2 achieves state-of-the-art zero-shot performance across probabilistic and point forecasting metrics.
+    The largest gains are observed on covariate-informed tasks, where Chronos-2 substantially outperforms prior
+    foundation models.
+    Additional analyses show that in-context learning improves performance even for univariate tasks via cross-learning,
+    particularly in short-history or cold-start regimes.
+
+    Overall, Chronos-2 establishes a universal forecasting paradigm in which a single pretrained model can be deployed
+    “as is” across heterogeneous forecasting scenarios. The work demonstrates that combining group-based attention with
+    large-scale synthetic pretraining enables practical, scalable, and flexible time series foundation models,
+    significantly advancing the applicability of zero-shot forecasting in real-world systems
