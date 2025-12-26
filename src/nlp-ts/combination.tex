@@ -1,0 +1,85 @@
+\subsection{The Integration of Language Models and Time Series Forecasting}
+
+\subsubsection{Introduction}
+
+The integration of Large Language Model (LLM) architectures with time series forecasting represents a significant modern development, moving beyond traditional statistical models to leverage the advanced pattern recognition and long-range dependency modeling capabilities inherent in Transformer-based architectures. 
+This can be understood as applying high-capacity, non-linear sequence models, originally developed for discrete symbolic data to continuous temporal observations.
+
+\subsubsection{Why Combine Language Models with Time Series?}
+
+Traditional time series models such as ARIMA and Exponential Smoothing excel at capturing specific temporal patterns (ex. autocorrelation, seasonality, trend). 
+However they often struggle with: 
+
+\begin{itemize}
+	\item Complex non-linear dependencies: Especially over very long horizons or involving intricate interactions with many exogenous variables (ex. the Easter holiday effect)
+	\item Multi-modality: Incorporating diverse data types such as textural descriptions, clinical notes, event logs or other contextual information alongside numerical series
+	\item Transfer learning / Zero-shot forecasting: Generalizing insights learned from a vast datasets of time series to new, unseen time series, akin to how LLMs generalize to new prompts
+	\item Learning global patterns: Identifying universal dynamics across thousands or millions of disparate time series, rather than fitting one model per series
+\end{itemize}
+
+LLM architectures and in particular the Transformer offer solutions to these challenges due to their attention mechanisms, which effectively capture long-range dependencies and their ability to process vast amounts of data during pretraining.
+
+\subsubsection{Bridging the Gap: Tokenization and Embeddings for Time Series}
+
+The core challenge in applying LLM architectures to time series is that LLMs are designed to process sequences of discrete tokens (words, sub-words), whereas time series consist of continuous numerical values. Bridging this gap involves two primary strategies:
+
+\begin{itemize}
+	\item Time Series Tokenization (Numeric to Symbolic Conversion): The aim is to transform continuous time series values into discrete symbolic sequences: \begin{itemize}
+		\item Discretizing / Quantization: Time series values (or differences, rates of change) are mapped to a finite set of bins or categories. For example, a change in sales volume might be categorized as "large drop", "small drop", "unchanged", "small gain", "large gain". Each category then becomes a "token". This is similar to binning algorithms when preparing a histogram.
+		\item Learned Tokenization: Instead of fixed bins, a neural network learns an optimal discrete representation for segments of the time series. In other branches of statistics, clustering might be analogous to this operation.
+	\end{itemize}
+	
+	\item Time Series Embeddings: Once tokenized these representations are converted into dense, continuous vector embeddings, which are the actual inputs to the Transformer layers. \begin{itemize}
+		\item Value embeddings: For explicitly tokenized values (ex. "small gain"), an embedding layer (a NLP lookup table) maps each discrete token to a dense vector. For implicitly tokenized values (ex. directly from numerical patches), a linear projection layer converts the raw numerical vector into an embedding vector.
+		\item Temporal positional embeddings: Critical for preserving temporal order and capturing periodicity. These can be: \begin{itemize}
+			\item Fixed sinusoidal: As in original Transformers, based on the position index
+			\item Learned: The model learns specific embeddings for time steps, days of the week, months or year
+			\item Fourier features: Projecting time indices onto sine/cosine functions to capture seasonality
+			\item Statistical analogue: Incorporating basis functions (ex. splines, Fourier terms) for time, but learned and embedded into higher-dimensional space
+		\end{itemize}
+		\item Static covariate embeddings: Time-invariant metadata (ex. product ID, store characteristics) are also embedded and often concatenated with temporal embeddings or used to modulate attention. This would be similar to including fixed effects or group-level predictors in a hierarchical model
+		\item Exogenous covariate embeddings: Continuous exogenous variables are often linearly projected into the embedding space and added to the value embeddings
+	\end{itemize}
+\end{itemize}
+
+\subsubsection{Architectural Integration Strategies}
+
+Several approaches are emerging to combine these components.
+
+\begin{itemize}
+	\item LLM as a Feature Extractor: \begin{itemize}
+		\item The time series data (after tokenization / embedding) is fed into the encoder block of a Transformer-based architecture
+		\item The encoder output is then passed to a smaller, more traditional forecasting head such as a multi-layer perception or simple linear regression to predict values
+		\item This strategy uses deep learning to create highly non-linear, dynamic latent features which are then used as predictors in a generalized linear model. Some popular variants like Chronos implicitly follow this strategy. \cite{ansari2024chronoslearninglanguagetime}
+	\end{itemize}
+	\item Generative forecasting with LLMs: \begin{itemize}
+		\item The Transformer architecture is trained to predict the next token, or next embedded numerical value, in the sequence. This is analogous to how LLMs predict the next word in a sequence.
+		\item Forecasting then becomes a process of autoregressively generating future "tokens" or embeddings, which are then decoded back into numerical values. \cite{micheli2023transformerssampleefficientworldmodels}
+		\item A statistical analogue would be a highly flexible, non-linear conditional probability model for sequential data, $P(y_{t+1} | y_1, ..., y_t, X_t)$, where the parameters of this conditional distribution are learned by the Transformer.
+	\end{itemize}
+	\item Hybrid Architectures: \begin{itemize}
+		\item Combines domain-specific time series layers (ex. convolutional layers for local patterns, or specialized recurrent layers for state-tracking) with Transformer blocks to capture global dependencies.
+		\item Ensemble modeling would be the most analogous statistical approach to this pattern. This allows different components to be responsible for and optimized for different aspects of the temporal structure, but now highly parameterized by deep learning. \cite{zhou2021informerefficienttransformerlong} 
+	\end{itemize}
+\end{itemize}
+
+\subsubsection{Statistical Implications and Advantages}
+
+\begin{itemize}
+	\item Non-linear and long-range dependencies: Attention mechanisms allow the model to weight historical observations dynamically, overcoming limitations of fixed-order autoregressive models or exponentially decaying memory.
+	\item Global modeling and transfer learning: Training a single large model on diverse time series enables it to learn general principles of temporal dynamics, allowing for better performance on series with sparse data or new series (zero-shot/few-shot learning). This is analogous to hierarchical modeling with an extremely rich functional form for the hyper-parameters.
+	\item Multimodality: Seamlessly integrates various data types (textual descriptions, categorical attributes, numerical series) by embedding them into a common vector space. This allows for rich contextual forecasting that classical models struggle with.
+	\item Scalability: Once pretrained on massive datasets, these models can be fine-tuned or directly applied to new tasks efficiently.
+\end{itemize}
+
+\subsubsection{Challenges}
+
+\begin{itemize}
+	\item Computational expense: Training and deploying large Transformer models are resource-intensive.
+	\item Interpretability: While attention weights can offer some insights, the end-to-end nature of LLM architectures often obscures the precise statistical mechanisms driving a forecast, posing challenges for domain experts who rely on transparent models.
+	\item Data formatting: The "tokenization" step is crucial and can significantly impact performance, requiring careful design and often learned components.
+	\item Robustness: Ensuring these models do not "hallucinate" future values or misinterpret subtle temporal cues requires robust training and validation.
+\end{itemize}
+
+Combining LLM architectures with time series forecasting is an ambitious effort to equip time series analysis with the advanced representational power and scale of modern deep learning, allowing for more flexible, generalizable and context-aware predictions.
+
