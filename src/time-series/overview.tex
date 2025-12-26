@@ -1,0 +1,39 @@
+\subsection{Modern Time Series Regression}
+
+While classical time series analysis focuses on decomposition (trend, seasonality, noise) and linear autoregressive relationships (Exponential Smoothing, ARIMA), modern time series regression view the problem through the lens of supervised learning on sequential data with high-dimensional covariates. The field has been evolving from handcrafted feature engineering into end-to-end learning of temporal dependencies.
+
+\subsubsection{The Shift to Global Models}
+
+Classical approaches like fitting an ARIMA model are typically "local," or one model is fit per time series. 
+If you have 10,000 distinct product sales series; you fit, evaluate and monitor 10,000 distinct models.
+
+Modern approaches utilize "global" models. 
+A single model is trained across thousands or millions of related time series simultaneously. 
+This allows the model to learn cross-series patterns and shared latent structure, essentially borrowing strength from the population to improve inference on individual series.
+This is analogous to a move from separate simple linear regression models for each topic into a massive hierarchical model where parameters are shared or regularized across groups.
+
+\subsubsection{Handling Covariates: Past, Future and Static}
+
+In classical ARIMA, exogenous regressors ($X_t$) are often excluded or at best considered as an afterthought. 
+Modern architectures explicitly handle three distinct types of inputs:
+
+\begin{itemize}
+	\item Past Covariates: Observed values strictly available up to time $t$
+	\item Future Covariates: Values known in advance for the forecast horizon $t+k$
+	\item Static Covariates: Time-invariant metadata
+\end{itemize}
+
+\subsubsection{Deep Learning Architectures: RNNs and Transformers}
+
+While linear autoregression ($y_t = \sum \phi_i y_{t-i} + \epsilon_t$) is a strong baseline, non-linear dependencies are now modeled using neural architectures:
+
+\begin{itemize}
+	\item RNNs (LSTMs): Maintain a hidden state vector $h_t$ that acts as a summary statistic of the entire history. This is effectively a state-space model with a non-linear transition function 
+	\item Transformers: As in NLP, attention mechanisms allow the model to weight historical time steps non-uniformly based on relevance rather than simple geometric decay
+\end{itemize}
+
+\subsubsection{Summary}
+
+Modern time series regression treats forecasting as a high-dimensional supervised learning problem.
+It favors global models that learn shared representations across many series, employs flexible neural architectures to approximate non-linear autoregressive functions and emphasizes probabilistic outputs to quantify uncertainty rigorously.
+
