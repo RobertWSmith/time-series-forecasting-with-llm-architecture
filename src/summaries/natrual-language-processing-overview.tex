@@ -1,0 +1,114 @@
+\subsection{Natural Language Processing Overview}
+
+\subsection*{Phase 1: The Statistical Foundation of Language Modeling}
+
+Before diving into architecture, we must define the problem space in statistical terms.
+
+\subsection*{The Joint Probability of Sequences}
+
+Fundamentally, language modeling is the estimation of a joint probability distribution over a sequence of discrete tokens $X = (x_1, x_2, \dots, x_T)$, where each $x_t$ belongs to a vocabulary $V$.
+$$ P(X) = \prod_{t=1}^{T} P(x_t \mid x_1, \dots, x_{t-1}) $$
+
+Statistician's View: This is an autoregressive model. 
+Traditional N-gram models approximated this by truncating the conditional history (Markov assumption) to order $n$. 
+Transformers aim to model this probability without a fixed horizon constraint,
+effectively capturing long-range dependencies.
+
+\subsection*{Distributional Semantics and Embeddings}
+Discrete tokens are mathematically sparse and orthogonal (one-hot vectors). 
+We map these to a continuous vector space $\mathbb{R}^d$.
+
+The Matrix Factorization View: Early methods (like LSA) used SVD on co-occurrence matrices. 
+Modern approaches (Word2Vec, and later the Transformer's input layer) learn a lookup matrix $E \in \mathbb{R}^{|V| \times d}$.
+Goal: To maximize the dot product (cosine similarity) of vectors that appear in similar
+distributions of contexts.
+
+\subsection*{Phase 2: The Transformer Architecture (The "Non-Recurrent" Shift)}
+
+Prior to 2017, Recurrent Neural Networks (RNNs) processed data sequentially ($t, t+1, \dots$). 
+Transformers process the entire sequence in parallel using a mechanism called Self-Attention.
+
+\subsection*{Positional Encodings}
+Since the model processes the sequence as a set rather than a list, we must inject order information.
+$$ PE_{(pos, 2i)} = \sin(pos / 10000^{2i/d_{model}}) $$
+$$ PE_{(pos, 2i+1)} = \cos(pos / 10000^{2i/d_{model}}) $$
+
+Statistician's View: This is essentially adding a deterministic, high-frequency 
+"time covariate" to the input embeddings so the regression function can distinguish
+between identical tokens at different positions.
+
+\subsection*{Scaled Dot-Product Attention (The Kernel)}
+This is the core differentiator. 
+For a query matrix $Q$, key matrix $K$, and value matrix $V$:
+$$ \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V $$
+
+Statistician's View:
+$QK^T$: A similarity matrix (Gram matrix) measuring the correlation between every token and every other token.
+Softmax: Creates a probability distribution (weights sum to 1). 
+This acts as a kernel smoother or a Nadaraya-Watson estimator. 
+We are computing a weighted average of the "Values" ($V$) based on the similarity between "Queries" and "Keys."
+$\sqrt{d_k}$: A scaling factor to prevent gradients from vanishing (keeping the 
+variance of the dot products stable).
+
+\subsection*{Multi-Head Attention}
+Instead of one attention mechanism, we run $h$ mechanisms in parallel on projections of the data, then concatenate results.
+
+Statistician's View: This is analogous to ensemble methods or mixture models. Different "heads" learn to focus on different syntactic or semantic relationships (e.g., Head 1 tracks subject-verb agreement; Head 2 tracks pronoun coreference).
+
+\subsection{Training Paradigms (Inference and Estimation)}
+
+Modern NLP relies on a two-step procedure: Pre-training (Unsupervised/Self-supervised) followed by Fine-tuning (Supervised).
+
+\subsection*{Pre-training Objective: Masked Language Modeling (BERT)}
+Given a sequence $X$, we corrupt it by masking 15% of tokens to create $\tilde{X}$. We aim to maximize the log-likelihood of the masked tokens $\bar{x}$ given $\tilde{X}$.
+$$ \mathcal{L}{MLM} = -\sum{\bar{x} \in m} \log P(\bar{x} \mid \tilde{X}; \theta) $$
+
+Statistician's View: This is a denoising autoencoder objective. It is also conceptually similar to imputation of missing data using the conditional distribution defined by the observed data.
+
+\subsection*{Pre-training Objective: Causal Language Modeling (GPT)}
+We maximize the likelihood of the next token given previous tokens.
+$$ \mathcal{L}{CLM} = -\sum{t} \log P(x_t \mid x_{<t}; \theta) $$
+
+Statistician's View: Standard Maximum Likelihood Estimation (MLE) on an autoregressive process.
+
+\subsection*{Fine-Tuning}
+We take the parameters $\theta$ learned from pre-training and treat them as a warm start for a specific task (e.g., classification, sentiment analysis). We usually add a small linear layer on top and optimize a supervised loss (e.g., Cross-Entropy).
+
+Statistician's View: Transfer learning. We are using the massive unlabelled dataset to learn a high-dimensional manifold (the prior), then using the labeled data to find the decision boundary within that manifold.
+
+\subsection{Modern Refinements and Evaluation}
+
+\subsection*{Regularization Techniques}
+Deep Transformers are prone to overfitting.
+
+Dropout: Randomly zeroing out activations (Bernoulli noise) during training.
+Layer Normalization: Standardizing inputs to mean 0 and variance 1 across the feature dimension for each sample.
+Note: Unlike Batch Norm, Layer Norm is independent of the batch statistics, crucial for variable-length sequence modeling.
+
+\subsection*{Decoding Strategies (Sampling)}
+When generating text, we sample from the output probability distribution $P(x_t \mid x_{<t})$.
+
+Greedy Search: Always pick $\arg\max$. (Can get stuck in loops).
+Beam Search: Keep the top $k$ most probable paths.
+Temperature Sampling: Rescale logits by $1/T$ before softmax.
+$T < 1$: Peaked distribution (low variance, conservative).
+$T > 1$: Flat distribution (high variance, creative).
+Top-P (Nucleus) Sampling: Sample from the smallest set of tokens whose cumulative probability exceeds $p$. This truncates the "long tail" of the distribution dynamically.
+
+\subsection{The "Black Box" Interpretability Challenge}
+
+For statisticians, the lack of distinct coefficients is often troubling.
+
+\subsection*{Attention Maps}
+We can visualize the attention weights $\alpha_{ij}$ to see which input tokens influenced a specific output.
+
+Caveat: Attention is necessary but not sufficient for explanation. High attention weight does not strictly imply causal importance.
+
+\subsection*{Probing Classifiers}
+To test if the model "knows" syntax, we freeze the Transformer and train a linear regression on its internal states to predict linguistic features (e.g., part-of-speech).
+
+Statistician's View: Testing for multicollinearity or information leakage between the latent representation and specific linguistic variables.
+
+\subsection*{Summary for the Statistician}
+
+NLP with Transformers is essentially kernel-based regression (Attention) combined with hierarchical representation learning, optimized via stochastic gradient descent (SGD) to maximize the likelihood of sequence continuation or reconstruction. The innovation lies not in a new fundamental statistical theory, but in an architectural prior that perfectly suits the discrete, sequential, and contextual nature of human language.

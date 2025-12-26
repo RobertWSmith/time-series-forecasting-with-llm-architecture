@@ -1,15 +1,25 @@
-\documentclass[a4paper, 12pt]{article}
+\documentclass[a4paper, titlepage, 12pt]{article}
+
+\author{Robert W. Smith}
+\title{Time Series Forecasting with LLM Architectures}
+\date{May, 2026}
+
 \usepackage{amsfonts}
+\usepackage{amsmath}
 
 \usepackage[utf8]{inputenc}
 \usepackage{babel,csquotes,xpatch}
 \usepackage[backend=biber, style=numeric]{biblatex}
 \addbibresource{main.bib}
 
+\usepackage{titlesec, titletoc}
+\setcounter{tocdepth}{4}
+
 \usepackage{xurl}
 \usepackage[colorlinks,allcolors=blue]{hyperref}
 
-% Document
+\renewcommand{\contentsname}{}
+
 \begin{document}
 
     \frenchspacing
@@ -17,16 +27,24 @@
     \selectlanguage{american}
     \pagenumbering{arabic}
     \pagestyle{plain}
+    
+    \maketitle
 
     \tableofcontents
     \newpage
+    
+    \section{Core Concepts}\label{sec:natural-language-processing}
+    	\input{nlp/overview}
+    	\input{time-series/overview}
+    	\input{nlp-ts/combination}
 
     \section{Literature Review}\label{sec:literature-review}
-        \include{summaries/transformers}
-        \include{summaries/chronos}
-        \include{summaries/time-series-transformers}
+    	\input{summaries/natrual-language-processing-overview}
+        \input{summaries/transformers}
+        \input{summaries/chronos}
+        \input{summaries/time-series-transformers}
 
     \section{Bibliography}\label{sec:bibliography}
-        \bibliographystyle{plain}
+        \printbibliography
 
 \end{document}

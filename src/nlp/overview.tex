@@ -1,0 +1,55 @@
+\subsection{Natural Language Processing (NLP) Overview}
+
+To a statistician, modern NLP can be best understood not as a set of linguistic rules, but as high-dimensional modeling of discrete sequences. 
+The field previously was dominated by rule-based systems, but now is data-driven with probabilistic models more similar to non-parametric estimation.
+
+\subsubsection{From Atomic Symbols to Vector Spaces}
+
+Historically, words were treated as discrete, independent atomic symbols using a one-hot-encoding style approach. 
+This resulted in sparse, high-dimensional spaces where the distance between "dog" and "cat" was orthogonal, identical to the distance between "dog" and "microscope."
+
+Modern NLP maps discrete tokens to dense, continuous vector spaces $\mathbb{R}^d$ (where $d$ is typically between 512-4096). 
+This is effectively a dimensionality reduction technique where geometric proximity encodes semantic similarity. 
+These vectors are learned parameters, optimized to maximize the likelihood of observing a word give its context. 
+
+\subsubsection{Modeling Sequences: The Move to Attention}
+
+Early statistical NLP used Markov chains (NLP terminology: N-Gram) to predict the next token based on the previous $n-1$ tokens. 
+This strategy suffers heavily from the curse of dimensionality.
+Recurrent Neural Networks (RNNs) attempted to solve this problem by maintaining a hidden state vector that updated over time, essentially an autoregressive process with memory. 
+
+Modern NLP relies on the Transformer architecture. 
+Instead of processing data sequentially, Transformers use an "Attention mechanism." \cite{vaswani2023attentionneed}
+This mechanism calculates a weighted average of all input vectors to determine which parts of the sequence are relevant to the current prediction task.
+Attention can be thought of as a dynamic kernel smoothing estimator.
+The model learns to assign weights (importance) to different parts of the input data based on the data itself and not a fixed window.
+
+\subsubsection{Language Models as Generative Distributions}
+
+Language Models (like OpenAI's GPT-series) are probabilistic generative models trained on massive text corpora. 
+Their fundamental objective is maximizing the joint probability of a sequence of tokens $ x = (x_1, x_2, ..., x_T) $.
+
+Using the chain rule of probability, this is factorized as:
+$$ P(x) = \prod_{t=1}^{T} P(x_t | x_1, ..., x_{t-1}) $$
+
+This type of model estimates the conditional probability of the next token $x_t$ over the entire vocabulary, given the context of all previous tokens.
+This refactors the language problem into a extremely high-capacity non-parametric density estimation problem. 
+Training these models involves minimizing the Kullback-Leiblier (KL) divergence between the model's predicted distribution and the empirical distribution of the training data.
+
+\subsubsection{Fine-Tuning and Alignment}
+
+While the "pre-training" phase learns the statistical structure of language, the resulting model merely predicts the most likely continuation.
+To make models helpful assistants, we apply Reinforcement Learning from Human Feedback (RLHF). \cite{ouyang2022traininglanguagemodelsfollow}
+
+Process:
+
+\begin{itemize}
+	\item Supervised Fine-Tuning: The model is trained on specific input-output pairs
+	\item Reward Modeling: A seperate statistical model is trained to predict a scalar reward signal (quality score) based on human preference data
+	\item Policy Optimization: The language model is updated to maximize the expected reward while remaining as close to the original distribution as possible (using KL-regularization)
+\end{itemize}
+
+\subsubsection{NLP Summary for the Statistician}
+
+Modern NLP has essentially solved the problem of encoding discrete, symbolic data into continuous manifolds where calculus based optimization (Stochastic Gradient Descent) can be applied. 
+It treats language generation as sampling from a learned conditional probability distribution, parameterized by billions of weights and conditioned on an input prompt.

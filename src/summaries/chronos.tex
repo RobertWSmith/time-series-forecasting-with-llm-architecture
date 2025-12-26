@@ -45,12 +45,12 @@
     time series. Groups may represent independent series, multiple variates of a multivariate system, collections of
     related items for cross-learning, or combinations of targets with past-only and known covariates.
     By alternating time attention (along the temporal axis) with group attention (across series within a group), the
-    model learns to infer interdependencies dynamically at inference time, without requiring task-specific architectural
+    model learns to infer inter-dependencies dynamically at inference time, without requiring task-specific architectural
     changes or fine-tuning.
 
     The model adopts an encoder-only transformer architecture inspired by T5 and operates on patched, normalized
     real-valued inputs rather than discrete tokens.
-    Inputs are robustly standardized using a sinh⁻¹ transformation to stabilize heavy-tailed distributions, augmented
+    Inputs are robustly standardized using a $sinh^-1$ transformation to stabilize heavy-tailed distributions, augmented
     with explicit time-index and mask meta-features, and embedded via a residual patch encoder.
     Forecasts are produced through a direct multi-horizon quantile head, yielding probabilistic predictions over a dense
     grid of quantiles, including extreme tails to better capture rare events.
@@ -64,7 +64,7 @@
     Empirical ablations show that these synthetic datasets are critical for enabling universal in-context learning and
     that models trained exclusively on synthetic data remain competitive.
 
-    Extensive evaluation on three large benchmarks—fev-bench, GIFT-Eval, and Chronos Benchmark II—demonstrates that
+    Extensive evaluation on three large benchmarks: fev-bench, GIFT-Eval, and Chronos Benchmark II demonstrates that
     Chronos-2 achieves state-of-the-art zero-shot performance across probabilistic and point forecasting metrics.
     The largest gains are observed on covariate-informed tasks, where Chronos-2 substantially outperforms prior
     foundation models.

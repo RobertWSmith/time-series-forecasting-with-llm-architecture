@@ -13,7 +13,7 @@
 \subsection*{Self-Attention as Adaptive Linear Smoothing}
     Self-attention replaces fixed-lag dependence with data-dependent linear combinations across all time indices.
     Given latent inputs ($$H = (h_1,\dots,h_n)$$), three linear projections are formed:
-    $$Q = HW_Q,\quad K = HW_K,\quad V = HW_V$$, where (W_Q,W_K,W_V) are learned matrices.
+    $$Q = HW_Q,\quad K = HW_K,\quad V = HW_V$$, where ($W_Q$,$W_K$,$W_V$) are learned matrices.
     For each time index (i), the output is $$\tilde h_i = \sum_{j=1}^n \alpha_{ij} v_j$$, with weights
     $$\alpha_{ij} = \frac{\exp\left( q_i^\top k_j / \sqrt{d_k} \right)}{\sum_{\ell=1}^n \exp\left( q_i^\top k_\ell / \sqrt{d_k} \right)}$$.
 
@@ -45,7 +45,7 @@
 
 \subsection*{Residual Connections and Normalization}
     Each sublayer is wrapped in a residual connection and layer normalization:
-    $$h \leftarrow \text{LayerNorm}(h + \text{Sublayer}(h))$$.
+    $$h\leftarrow\text{LayerNorm}(h+\text{Sublayer}(h))$$.
     Statistically, this stabilizes estimation by preserving a linear identity path while allowing incremental nonlinear
     corrections, mitigating vanishing gradients and overfitting in deep stacks.
 
