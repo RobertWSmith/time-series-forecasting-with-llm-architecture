@@ -8,9 +8,9 @@
 \usepackage{amsmath}
 
 \usepackage[utf8]{inputenc}
-\usepackage{babel,csquotes,xpatch}
-\usepackage[backend=biber, style=numeric]{biblatex}
-\addbibresource{main.bib}
+\usepackage{csquotes,xpatch}
+\usepackage[american]{babel}
+\usepackage{natbib}
 
 \usepackage{titlesec, titletoc}
 \setcounter{tocdepth}{4}
@@ -18,7 +18,7 @@
 \usepackage{xurl}
 \usepackage[colorlinks,allcolors=blue]{hyperref}
 
-\renewcommand{\contentsname}{}
+\setlocalecaption{american}{contents}{Table of Contents}
 
 \begin{document}
 
@@ -45,6 +45,7 @@
         \input{summaries/time-series-transformers}
 
     \section{Bibliography}\label{sec:bibliography}
-        \printbibliography
+        \bibliographystyle{apalike}
+        \bibliography{references}
 
 \end{document}
